@@ -53,7 +53,14 @@ class UserData {
 			$uid = $this->userResolver->findExistingUserId($uid, true);
 			$this->uid = $uid;
 		} catch (NoUserFoundException) {
-			return '';
+		    try {
+                $uid = $this->extractSamlEmail();
+                $uid = $this->userResolver->findExistingUserIdByEmail($uid, true);
+                $this->uid = $uid;
+            }
+            catch (NoUserFoundException) {
+                return '';
+            }
 		}
 		return $uid;
 	}
@@ -81,6 +88,19 @@ class UserData {
 		}
 		return '';
 	}
+
+    protected function extractSamlEmail(): string {
+        $prefix = $this->samlSettings->getPrefix();
+        $uidMapping = $this->config->getAppValue('user_saml', $prefix . 'saml-attribute-mapping-email_mapping');
+        if(isset($this->attributes[$uidMapping])) {
+            if (is_array($this->attributes[$uidMapping])) {
+                return trim($this->attributes[$uidMapping][0]);
+            } else {
+                return trim($this->attributes[$uidMapping]);
+            }
+        }
+        return '';
+    }
 
 	/**
 	 * returns the plain text UUID if the provided $uid string is a

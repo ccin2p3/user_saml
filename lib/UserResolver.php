@@ -41,6 +41,30 @@ class UserResolver {
 		throw new NoUserFoundException('User' . $rawUidCandidate . ' not valid or not found');
 	}
 
+    /**
+     * @throws NoUserFoundException
+     */
+    public function findExistingUserIdByEmail(string $rawUidCandidate, bool $force = false): string {
+        if($user = $this->userManager->getByEmail($rawUidCandidate)) {
+            if ( count($user) === 1 ) {
+                return $user[0]->getUID();
+            }
+            throw new NoUserFoundException('More than 1 user with ' . $rawUidCandidate . ' email');
+        }
+        try {
+            $sanitized = $this->sanitizeUserIdCandidate($rawUidCandidate);
+        } catch(\InvalidArgumentException $e) {
+            $sanitized = '';
+        }
+        if($user = $this->userManager->getByEmail($sanitized)) {
+            if ( count($user) === 1 ) {
+                return $user[0]->getUID();
+            }
+            throw new NoUserFoundException('More than 1 user with ' . $rawUidCandidate . ' email');
+        }
+        throw new NoUserFoundException('User' . $rawUidCandidate . ' not valid or not found');
+    }
+
 	/**
 	 * @throws NoUserFoundException
 	 */
