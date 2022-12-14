@@ -90,8 +90,9 @@ class UserData {
 	}
 
     protected function extractSamlEmail(): string {
-        $prefix = $this->samlSettings->getPrefix();
-        $uidMapping = $this->config->getAppValue('user_saml', $prefix . 'saml-attribute-mapping-email_mapping');
+        $pid = $this->samlSettings->getProviderId();
+        $config = $this->samlSettings->get($pid);
+        $uidMapping = $this->config->getAppValue('user_saml', $config['saml-attribute-mapping-email_mapping']);
         if(isset($this->attributes[$uidMapping])) {
             if (is_array($this->attributes[$uidMapping])) {
                 return trim($this->attributes[$uidMapping][0]);
