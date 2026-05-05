@@ -243,7 +243,9 @@ class GroupManager {
 			return;
 		}
 
-		$this->jobList->add(MigrateGroups::class, ['gids' => $groups]);
+		foreach (array_chunk($groups, 30) as $chunk) {
+			$this->jobList->add(MigrateGroups::class, ['gids' => $chunk]);
+		}
 	}
 
 	protected function isGroupInTransitionList(string $groupId): bool {
